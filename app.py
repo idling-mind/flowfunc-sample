@@ -18,6 +18,7 @@ app.title = "Flowfunc Demo"
 
 HELP = """
 This is an example usage of [Dash Flowfunc Component](https://github.com/idling-mind/flowfunc).
+You can find the source code for this example [here](https://github.com/idling-mind/flowfunc-sample)
 
 ## How to use this example
 
