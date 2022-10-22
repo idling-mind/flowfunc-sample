@@ -234,11 +234,10 @@ def func(n_clicks, nodes):
         Input("input", "selected_nodes"),
         State("input", "nodes"),
     ],
-    prevent_initial_call=True,
 )
 def func(selected_node, nodes):
     if not selected_node:
-        return "Node Help", "Select a node to see help"
+        return "Node Help", "Click a node to see it's help"
     outnode = OutNode(**nodes.get(selected_node[0]))
     node = fconfig.get_node(outnode.type)
     return f"Help for {node.label}", dash.html.Code(dash.html.Pre(node.method.__doc__))
