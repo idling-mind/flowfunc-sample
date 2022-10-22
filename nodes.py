@@ -1,6 +1,6 @@
 from functools import lru_cache
 from enum import Enum
-from typing import Any, Literal, Union, Tuple
+from typing import Any, Union, Tuple
 from dash import html, dcc
 import plotly.express as px
 import pandas as pd

@@ -1,6 +1,5 @@
 from pathlib import Path
 import time
-from tkinter import ALL
 import flowfunc
 from flowfunc.config import Config
 from flowfunc.jobrunner import JobRunner
