@@ -1,0 +1,151 @@
+{
+    "eGt0cjCHRN": {
+        "id": "eGt1cjCHRN",
+        "x": -402.9921875,
+        "y": -295.5,
+        "type": "nodes.sample_data",
+        "width": 200,
+        "connections": {
+            "inputs": {},
+            "outputs": {
+                "result": [
+                    {
+                        "nodeId": "VOn2PVEOLT",
+                        "portName": "df"
+                    },
+                    {
+                        "nodeId": "QMIgdWjCbz",
+                        "portName": "df"
+                    }
+                ]
+            }
+        },
+        "inputData": {
+            "dataset": {
+                "dataset": "https://gist.github.com/netj/8836201/raw/6f9306ad21398ea43cba4f7d537619d0e07d5ae3/iris.csv"
+            }
+        }
+    },
+    "VOn2PVEOLT": {
+        "id": "VOn2PVEOLT",
+        "x": -107,
+        "y": -359.5,
+        "type": "nodes.scatter_plot_3d",
+        "width": 200,
+        "connections": {
+            "inputs": {
+                "df": [
+                    {
+                        "nodeId": "eGt0cjCHRN",
+                        "portName": "result"
+                    }
+                ]
+            },
+            "outputs": {
+                "result": [
+                    {
+                        "nodeId": "1PO2G5j9qH",
+                        "portName": "output1"
+                    }
+                ]
+            }
+        },
+        "inputData": {
+            "df": {
+                "DataFrame": null
+            },
+            "x": {
+                "markdown": "sepal.length"
+            },
+            "y": {
+                "markdown": "sepal.width"
+            },
+            "z": {
+                "markdown": "petal.length"
+            },
+            "color": {
+                "markdown": "variety"
+            }
+        }
+    },
+    "1PO2G5j9qH": {
+        "id": "1PO2G5j9qH",
+        "x": 223.0078125,
+        "y": -296.5,
+        "type": "nodes.display",
+        "width": 200,
+        "connections": {
+            "inputs": {
+                "output1": [
+                    {
+                        "nodeId": "VOn2PVEOLT",
+                        "portName": "result"
+                    }
+                ],
+                "output2": [
+                    {
+                        "nodeId": "QMIgdWjCbz",
+                        "portName": "result"
+                    }
+                ]
+            },
+            "outputs": {}
+        },
+        "inputData": {
+            "output1": {
+                "object": null
+            },
+            "output2": {
+                "object": null
+            },
+            "output3": {
+                "object": null
+            },
+            "output4": {
+                "object": null
+            },
+            "output5": {
+                "object": null
+            }
+        }
+    },
+    "QMIgdWjCbz": {
+        "id": "QMIgdWjCbz",
+        "x": -103.0078125,
+        "y": 51.5,
+        "type": "nodes.scatter_plot",
+        "width": 200,
+        "connections": {
+            "inputs": {
+                "df": [
+                    {
+                        "nodeId": "eGt0cjCHRN",
+                        "portName": "result"
+                    }
+                ]
+            },
+            "outputs": {
+                "result": [
+                    {
+                        "nodeId": "1PO2G5j9qH",
+                        "portName": "output2"
+                    }
+                ]
+            }
+        },
+        "inputData": {
+            "df": {
+                "DataFrame": null
+            },
+            "x": {
+                "markdown": "sepal.width"
+            },
+            "y": {
+                "markdown": "petal.length"
+            },
+            "color": {
+                "markdown": "variety"
+            }
+        }
+    }
+}

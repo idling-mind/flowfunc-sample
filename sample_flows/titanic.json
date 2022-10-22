@@ -1,0 +1,252 @@
+{
+    "cnY_Cvp-Kw": {
+        "id": "cnY_Cvp-Kw",
+        "x": -525,
+        "y": -271.5,
+        "type": "nodes.sample_data",
+        "width": 200,
+        "connections": {
+            "inputs": {},
+            "outputs": {
+                "result": [
+                    {
+                        "nodeId": "wlxHwMxyMk",
+                        "portName": "df"
+                    },
+                    {
+                        "nodeId": "Oi8Btod8_k",
+                        "portName": "df"
+                    },
+                    {
+                        "nodeId": "LqQ8ta6U8X",
+                        "portName": "df"
+                    }
+                ]
+            }
+        },
+        "inputData": {
+            "dataset": {
+                "dataset": "https://github.com/datasciencedojo/datasets/raw/master/titanic.csv"
+            }
+        }
+    },
+    "wlxHwMxyMk": {
+        "id": "wlxHwMxyMk",
+        "x": -259.0234375,
+        "y": -250.5,
+        "type": "nodes.scatter_plot_3d",
+        "width": 200,
+        "connections": {
+            "inputs": {
+                "df": [
+                    {
+                        "nodeId": "cnY_Cvp-Kw",
+                        "portName": "result"
+                    }
+                ]
+            },
+            "outputs": {
+                "result": [
+                    {
+                        "nodeId": "XJ7Az-eUcG",
+                        "portName": "output4"
+                    }
+                ]
+            }
+        },
+        "inputData": {
+            "df": {
+                "DataFrame": null
+            },
+            "x": {
+                "markdown": "Age"
+            },
+            "y": {
+                "markdown": "Fare"
+            },
+            "z": {
+                "markdown": "Pclass"
+            },
+            "color": {
+                "markdown": "Survived"
+            }
+        }
+    },
+    "XJ7Az-eUcG": {
+        "id": "XJ7Az-eUcG",
+        "x": 319.9921875,
+        "y": -108.5,
+        "type": "nodes.display",
+        "width": 200,
+        "connections": {
+            "inputs": {
+                "output1": [
+                    {
+                        "nodeId": "-Wm6TXDuND",
+                        "portName": "object"
+                    }
+                ],
+                "output5": [
+                    {
+                        "nodeId": "Oi8Btod8_k",
+                        "portName": "result"
+                    }
+                ],
+                "output4": [
+                    {
+                        "nodeId": "wlxHwMxyMk",
+                        "portName": "result"
+                    }
+                ],
+                "output2": [
+                    {
+                        "nodeId": "LqQ8ta6U8X",
+                        "portName": "result"
+                    }
+                ],
+                "output3": [
+                    {
+                        "nodeId": "7qYQtUxE2b",
+                        "portName": "object"
+                    }
+                ]
+            },
+            "outputs": {}
+        },
+        "inputData": {
+            "output1": {
+                "object": null
+            },
+            "output2": {
+                "object": null
+            },
+            "output3": {
+                "object": null
+            },
+            "output4": {
+                "object": null
+            },
+            "output5": {
+                "object": null
+            }
+        }
+    },
+    "Oi8Btod8_k": {
+        "id": "Oi8Btod8_k",
+        "x": 21.9765625,
+        "y": 68.5,
+        "type": "nodes.bubble_plot",
+        "width": 200,
+        "connections": {
+            "inputs": {
+                "df": [
+                    {
+                        "nodeId": "cnY_Cvp-Kw",
+                        "portName": "result"
+                    }
+                ]
+            },
+            "outputs": {
+                "result": [
+                    {
+                        "nodeId": "XJ7Az-eUcG",
+                        "portName": "output5"
+                    }
+                ]
+            }
+        },
+        "inputData": {
+            "df": {
+                "DataFrame": null
+            },
+            "x": {
+                "markdown": "Pclass"
+            },
+            "y": {
+                "markdown": "Age"
+            },
+            "size": {
+                "markdown": "Fare"
+            },
+            "color": {
+                "markdown": "Survived"
+            }
+        }
+    },
+    "-Wm6TXDuND": {
+        "id": "-Wm6TXDuND",
+        "x": 32.984375,
+        "y": -427.5,
+        "type": "nodes.markdown",
+        "width": 200,
+        "connections": {
+            "inputs": {},
+            "outputs": {
+                "object": [
+                    {
+                        "nodeId": "XJ7Az-eUcG",
+                        "portName": "output1"
+                    }
+                ]
+            }
+        },
+        "inputData": {
+            "markdown": {
+                "markdown": "# Plots using titanic dataset\n\nSample plots using the titanic dataset.\n\n## Summary"
+            }
+        }
+    },
+    "LqQ8ta6U8X": {
+        "id": "LqQ8ta6U8X",
+        "x": 32,
+        "y": -215.5,
+        "type": "nodes.describe_dataframe",
+        "width": 200,
+        "connections": {
+            "inputs": {
+                "df": [
+                    {
+                        "nodeId": "cnY_Cvp-Kw",
+                        "portName": "result"
+                    }
+                ]
+            },
+            "outputs": {
+                "result": [
+                    {
+                        "nodeId": "XJ7Az-eUcG",
+                        "portName": "output2"
+                    }
+                ]
+            }
+        },
+        "inputData": {
+            "df": {
+                "DataFrame": null
+            }
+        }
+    },
+    "7qYQtUxE2b": {
+        "id": "7qYQtUxE2b",
+        "x": 30.9921875,
+        "y": -87.5,
+        "type": "nodes.markdown",
+        "width": 200,
+        "connections": {
+            "inputs": {},
+            "outputs": {
+                "object": [
+                    {
+                        "nodeId": "XJ7Az-eUcG",
+                        "portName": "output3"
+                    }
+                ]
+            }
+        },
+        "inputData": {
+            "markdown": {
+                "markdown": "## Charts"
+            }
+        }
+    }
+}
