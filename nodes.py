@@ -10,6 +10,32 @@ import numpy as np
 import asyncio
 import time
 import dash
+from flowfunc.models import Port, Node, PortFunction
+
+
+def display_function(**kwargs):
+    """Display the output of the flow"""
+    outputs = []
+    for output in kwargs.values():
+        if isinstance(output, pd.DataFrame):
+            outputs.append(dataframe_to_datatable(output))
+        elif isinstance(output, dash.development.base_component.Component):
+            outputs.append(output)
+        else:
+            try:
+                outputs.append(str(output))
+            except Exception as e:
+                outputs.append(f"Error: {e}")
+    return html.Div(outputs)
+
+
+display_node = Node(
+    type="display",
+    label="Display Outputs",
+    description="Display the output of the flow",
+    method=display_function,
+    inputs=PortFunction(path="increasing_ports"),
+)
 
 
 def dataframe_to_datatable(df: pd.DataFrame):
@@ -44,9 +70,13 @@ def flatten_index(df):
     return ddf
 
 
-def markdown(markdown: str):
+def markdown(template: str, **kwargs):
     """Display Markdown
-    Display markdown in the dash app
+
+    Display markdown in the dash app. You can write any variable between curly braces
+    and it will be replaced by the value of the variable. A port will be created for
+    each variable
+
     Parameters
     ----------
     markdown: str
@@ -56,23 +86,17 @@ def markdown(markdown: str):
     markdown: object
         Dash markdown object
     """
-    return dash.dcc.Markdown(markdown)
+    return dash.dcc.Markdown(template.format(**kwargs))
 
 
-def display(output1, output2="", output3="", output4="", output5=""):
-    """Display outputs"""
-    outputs = []
-    for output in [output1, output2, output3, output4, output5]:
-        if isinstance(output, pd.DataFrame):
-            outputs.append(dataframe_to_datatable(output))
-        elif isinstance(output, dash.development.base_component.Component):
-            outputs.append(output)
-        else:
-            try:
-                outputs.append(str(output))
-            except Exception as e:
-                outputs.append(f"Error: {e}")
-    return html.Div(outputs)
+markdown_node = Node(
+    type="markdown",
+    label="Markdown",
+    description="Display markdown in the dash app",
+    method=markdown,
+    inputs=PortFunction(path="dynamic_ports"),
+    outputs=[Port(type="str", name="markdown", label="Markdown")],
+)
 
 
 class DataFileType(Enum):
@@ -95,10 +119,14 @@ class SampleDataURL(Enum):
     countries = "https://github.com/bnokoro/Data-Science/raw/master/countries%20of%20the%20world.csv"
 
 
-@lru_cache(maxsize=None)
 def sample_data(dataset: SampleDataURL) -> pd.DataFrame:
     """Sample data sets like tianic, iris etc"""
-    return read_dataframe(dataset.value, DataFileType.csv, ",")
+    return read_dataframe(dataset.value, DataFileType.csv, ",").dropna()
+
+
+def filter_columns(df: pd.DataFrame, columns: str) -> pd.DataFrame:
+    """Filter columns of a dataframe. Enter the column names as a comma separated string"""
+    return df[[x.strip() for x in columns.split(",")]]
 
 
 class Aggregations(Enum):
@@ -111,7 +139,7 @@ class Aggregations(Enum):
 
 
 def group_and_aggregate(
-    df: pd.DataFrame, groupby: str, aggregations: List[Aggregations]
+    df: pd.DataFrame, groupby: str, aggregations: list[Aggregations]
 ) -> pd.DataFrame:
     """Groupby and aggregate a dataframe.
 
@@ -207,15 +235,21 @@ def describe_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """Statistics of a dataframe"""
     return df.describe()
 
+def aggregate_series(df: pd.DataFrame, name: str, agg: Aggregations):
+    """Returns the aggregated value of a series"""
+    return df.loc[:, name].agg(agg.value)
+
 
 all_functions = [
     sample_data,
+    filter_columns,
     group_and_aggregate,
-    markdown,
-    display,
+    aggregate_series,
     scatter_plot,
     bubble_plot,
     bar_plot,
     scatter_plot_3d,
     describe_dataframe,
 ]
+
+extra_nodes = [display_node, markdown_node]

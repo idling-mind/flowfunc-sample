@@ -3,20 +3,22 @@ import time
 import flowfunc
 from flowfunc.config import Config
 from flowfunc.jobrunner import JobRunner
+from flowfunc.models import OutNode
 import dash
 from dash.dependencies import Input, Output, State, ALL
 from dash import html, dcc
 import dash_bootstrap_components as dbc
+from dash_resizable_panels import Panel, PanelGroup, PanelResizeHandle
 import json
 import base64
 
-from flowfunc.models import OutNode
-from nodes import all_functions
+from nodes import all_functions, extra_nodes
 
 app = dash.Dash(external_stylesheets=[dbc.themes.SLATE])
 app.title = "Flowfunc Demo"
 
 HELP = """
+# Help
 This is an example usage of [Dash Flowfunc Component](https://github.com/idling-mind/flowfunc).
 You can find the source code for this example [here](https://github.com/idling-mind/flowfunc-sample)
 
@@ -64,9 +66,11 @@ Load a previously downloaded node file
 Some sample flows for you to start with.
 
 
-## Help for each node
+#### Help
 
-Click any node to see a help on that node in this sidebar
+Click the help button to see this help. If you select a node and click the button,
+you will see the docstring of the function that the node represents.
+
 """
 
 sample_flow_files = (Path(".") / "sample_flows").glob("**/*.json")
@@ -75,7 +79,7 @@ sample_flows = [
     for x in sample_flow_files
 ]
 
-fconfig = Config.from_function_list(all_functions)
+fconfig = Config.from_function_list(all_functions, extra_nodes=extra_nodes)
 job_runner = JobRunner(fconfig)
 
 node_editor = html.Div(
@@ -96,13 +100,14 @@ node_editor = html.Div(
                     label="Sample Flows",
                     group=True,
                 ),
+                dbc.Button(id="help", children="Help"),
                 dash.dcc.Store(id="nodestore", storage_type="local"),
             ],
             style={
                 "position": "absolute",
                 "top": "15px",
                 "left": "15px",
-                "z-index": "15",
+                "zIndex": "15",
             },
         ),
         html.Div(
@@ -122,46 +127,75 @@ node_editor = html.Div(
     ]
 )
 
+horizontal_resizer = PanelResizeHandle(
+    html.Div(
+        style={
+            "backgroundColor": "#333333",
+            "height": "5px",
+            "width": "100%",
+        }
+    )
+)
+vertical_resizer = PanelResizeHandle(
+    html.Div(
+        style={
+            "backgroundColor": "#333333",
+            "height": "100%",
+            "width": "5px",
+        }
+    )
+)
+
+panel_style = {
+    "maxHeight": "100%",
+    "overflow": "auto",
+    "padding": "15px",
+}
+
 app.layout = html.Div(
-    dbc.Row(
-        [
-            dbc.Col(width=8, children=node_editor, style={"padding": 0}),
-            dbc.Col(
-                id="output_col",
-                width=4,
-                style={"height": "100vh", "overflow": "auto", "padding": 0},
-                children=[
-                    dbc.Accordion(
-                        [
-                            dbc.AccordionItem(
-                                [dash.dcc.Markdown(HELP)],
-                                title="Help",
-                            ),
-                            dbc.AccordionItem(
-                                id="nodehelp",
-                                title="Node Help",
-                            ),
-                            dbc.AccordionItem(
-                                [
-                                    html.Div(
-                                        children=dash.dcc.Loading(
-                                            id="loading_comp",
-                                            type="circle",
-                                            children=html.Div(id="output"),
-                                        ),
-                                    ),
-                                ],
-                                title="Output",
-                            ),
-                        ],
-                        flush=True,
-                        start_collapsed=True,
-                    )
-                ],
-            ),
-        ],
-    ),
-    style={"overflow": "hidden"},
+    [
+        PanelGroup(
+            id="panel-group",
+            children=[
+                Panel(
+                    id="panel-1",
+                    children=[node_editor],
+                ),
+                horizontal_resizer,
+                Panel(
+                    id="panel-2",
+                    children=[
+                        PanelGroup(
+                            [
+                                Panel(
+                                    children=html.Div(
+                                        [
+                                            html.H1("Output"),
+                                            dash.dcc.Loading(
+                                                type="circle",
+                                                children=html.Div(
+                                                    "Run some flow to see it's output",
+                                                    id="output",
+                                                ),
+                                            ),
+                                        ],
+                                        style=panel_style,
+                                    )
+                                ),
+                                vertical_resizer,
+                                Panel(
+                                    children=html.Div(id="nodehelp", style=panel_style)
+                                ),
+                            ],
+                            direction="horizontal",
+                        ),
+                    ],
+                ),
+            ],
+            direction="vertical",
+        )
+    ],
+    style={"height": "100vh"},
 )
 
 
@@ -192,18 +226,28 @@ def parse_uploaded_contents(contents):
 )
 def display_output(runclicks, nodes):
     if not nodes:
-        return [], {}
+        return ["Run some flow to see it's output"], {}
     starttime = time.perf_counter()
     # output_dict = job_runner.run(nodes)
     nodes_output = job_runner.run(nodes)
     # nodes_output = {node_id: OutNode(**node) for node_id, node in output_dict.items()}
     endtime = time.perf_counter()
-    outdiv = html.Div(children=[])
+    children = []
     for node in nodes_output.values():
         if node.error:
-            outdiv.children.append(str(node.error))
+            children.append(
+                html.Div(
+                    [
+                        html.B(
+                            f"Node {node.id} ({node.type}): {node.error.__class__.__name__}"
+                        ),
+                        html.P(str(node.error), style={"color": "#cc0000"}),
+                    ]
+                )
+            )
         if "display" in node.type:
-            outdiv.children.append(node.result)
+            children.append(html.Div(node.result))
+    outdiv = html.Div(children=children)
 
     return outdiv, {node_id: node.status for node_id, node in nodes_output.items()}
 
@@ -227,21 +271,24 @@ def func(n_clicks, nodes):
 
 
 @app.callback(
-    [
-        Output("nodehelp", "title"),
-        Output("nodehelp", "children"),
-    ],
-    [
-        Input("input", "selected_nodes"),
-        State("input", "nodes"),
-    ],
+    Output("nodehelp", "children"),
+    Input("help", "n_clicks"),
+    State("input", "selected_nodes"),
+    State("input", "nodes"),
 )
-def func(selected_node, nodes):
+def func(nclicks, selected_node, nodes):
     if not selected_node:
-        return "Node Help", "Click a node to see it's help"
+        return dash.dcc.Markdown(HELP)
     outnode = OutNode(**nodes.get(selected_node[0]))
     node = fconfig.get_node(outnode.type)
-    return f"Help for {node.label}", dash.html.Code(dash.html.Pre(node.method.__doc__))
+    return html.Div(
+        [
+            html.H1(node.label),
+            dash.html.Code(
+                dash.html.Pre(node.method.__doc__, style={"fontSize": "1em"})
+            ),
+        ]
+    )
 
 
 @app.callback(
@@ -284,4 +331,4 @@ def update_output(
 
 
 if __name__ == "__main__":
-    app.run_server()
+    app.run_server(debug=True)
